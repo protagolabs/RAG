@@ -1,0 +1,160 @@
+import os
+import pymysql
+from dotenv import load_dotenv
+from typing import List, Dict, Any
+
+# Load environment variables
+load_dotenv()
+
+class MySQLConnection:
+    def __init__(self):
+        self.config = {
+            'host': os.getenv('RDS_HOST'),
+            'port': int(os.getenv('RDS_PORT')),
+            'user': os.getenv('RDS_USER'),
+            'password': os.getenv('RDS_PASSWORD'),
+            'charset': 'utf8mb4',
+            'cursorclass': pymysql.cursors.DictCursor
+        }
+        self.database = os.getenv('RDS_DATABASE')
+
+    def connect_to_database(self, database_name: str = None):
+        config = self.config.copy()
+        if database_name:
+            config['database'] = database_name
+        elif self.database:
+            config['database'] = self.database
+        return pymysql.connect(**config)
+
+    def create_database(self, database_name: str):
+        with self.connect_to_database() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f"CREATE DATABASE IF NOT EXISTS {database_name}")
+                conn.commit()
+
+    def list_databases(self) -> List[str]:
+        with self.connect_to_database() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SHOW DATABASES")
+                result = cursor.fetchall()
+                return [row['Database'] for row in result]
+
+    def delete_database(self, database_name: str):
+        with self.connect_to_database() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f"DROP DATABASE IF EXISTS {database_name}")
+                conn.commit()
+
+    def create_table(self, table_name: str, schema: str):
+        query = f"CREATE TABLE IF NOT EXISTS {table_name} ({schema})"
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                conn.commit()
+
+    def insert_data(self, table_name: str, data: Dict[str, Any]):
+        columns = ', '.join(data.keys())
+        placeholders = ', '.join(['%s'] * len(data))
+        query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, list(data.values()))
+                conn.commit()
+
+    def read_data(self, table_name: str, conditions: Dict[str, Any]) -> List[Dict[str, Any]]:
+        where_clause = ' AND '.join([f"{key} = %s" for key in conditions.keys()])
+        query = f"SELECT * FROM {table_name} WHERE {where_clause}"
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, list(conditions.values()))
+                result = cursor.fetchall()
+                return result if result else []
+
+    def update_data(self, table_name: str, data: Dict[str, Any], conditions: Dict[str, Any]):
+        set_clause = ', '.join([f"{key} = %s" for key in data.keys()])
+        where_clause = ' AND '.join([f"{key} = %s" for key in conditions.keys()])
+        query = f"UPDATE {table_name} SET {set_clause} WHERE {where_clause}"
+        values = list(data.values()) + list(conditions.values())
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, values)
+                conn.commit()
+
+    def delete_data(self, table_name: str, conditions: Dict[str, Any]):
+        where_clause = ' AND '.join([f"{key} = %s" for key in conditions.keys()])
+        query = f"DELETE FROM {table_name} WHERE {where_clause}"
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, list(conditions.values()))
+                conn.commit()
+
+    def search_data(self, table_name: str, search_term: str, columns: List[str]) -> List[Dict[str, Any]]:
+        like_clause = ' OR '.join([f"{col} LIKE %s" for col in columns])
+        search_value = f"%{search_term}%"
+        query = f"SELECT * FROM {table_name} WHERE {like_clause}"
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, [search_value] * len(columns))
+                results = cursor.fetchall()
+                return results if results else []
+
+# Example usage
+if __name__ == "__main__":
+    rds = MySQLConnection()
+    
+    # Create a new database
+    rds.create_database(rds.database)
+    
+    # List all existing databases
+    databases = rds.list_databases()
+    print("Databases:", databases)
+    
+    # Connect to the database
+    rds.connect_to_database(rds.database)
+
+    # Define table schema and create a users table
+    user_table_schema = """
+        id INT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        full_name VARCHAR(255) NOT NULL,
+        metadata TEXT
+    """
+    rds.create_table('users', user_table_schema)
+
+    # Insert data into the users table
+    user_data = {
+        "id": 1,
+        "username": "john_doe",
+        "email": "john@example.com",
+        "full_name": "John Doe",
+        "metadata": "user profile data"
+    }
+    rds.insert_data('users', user_data)
+    
+    # Read data from the users table
+    conditions = {"id": 1}
+    user_profile = rds.read_data('users', conditions)
+    print("User Profile:", user_profile)
+
+    # Update data in the users table
+    updated_data = {
+        "email": "john_doe_updated@example.com",
+        "full_name": "John Doe Updated"
+    }
+    rds.update_data('users', updated_data, conditions)
+
+    # Read the updated user profile
+    updated_user_profile = rds.read_data('users', conditions)
+    print("Updated User Profile:", updated_user_profile)
+
+    # Delete data from the users table
+    rds.delete_data('users', conditions)
+
+    # Verify the user has been deleted
+    deleted_user_profile = rds.read_data('users', conditions)
+    print("Deleted User Profile:", deleted_user_profile)
+
+    # Search for users based on a search term
+    search_results = rds.search_data('users', "john", ["username", "email", "full_name", "metadata"])
+    print("Search Results:", search_results)
