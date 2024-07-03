@@ -1,36 +1,33 @@
 # requirements.txt
 
 # Database connectors
-pymysql==1.0.2
-redis==4.5.4
-pymongo==4.3.3
-pymilvus==2.2.8
+pymysq
+redis
+pymongo
+pymilvus
 
 # Environment variable management
-python-dotenv==1.0.0
+python-dotenv
 
 # Additional useful packages
-numpy==1.24.3
-pandas==2.0.1
-requests==2.30.0
+numpy
+pandas
+requests
 
 # For potential future use with vector operations or machine learning
-scikit-learn==1.2.2
-
-# For potential future use with web applications
-Flask==2.3.2
+scikit-learn
 
 # For handling JSON data
-ujson==5.7.0
+ujson
 
 # For working with dates and times
-python-dateutil==2.8.2
+python-dateutil
 
 # For easier HTTP requests (if needed)
-httpx==0.24.1
+httpx
 
 # For async programming (if needed)
-aiohttp==3.8.4
+aiohttp
 
 # For data validation and settings management (recommended)
-pydantic==1.10.7
+pydantic
