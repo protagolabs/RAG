@@ -52,6 +52,29 @@ class MySQLConnection:
                 cursor.execute(query)
                 conn.commit()
 
+    def list_tables(self) -> List[str]:
+        query = "SHOW TABLES"
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                result = cursor.fetchall()
+                return [row[f'Tables_in_{self.database}'] for row in result]
+
+    def describe_table(self, table_name: str) -> List[Dict[str, Any]]:
+        query = f"DESCRIBE {table_name}"
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                result = cursor.fetchall()
+                return result
+
+    def delete_table(self, table_name: str):
+        query = f"DROP TABLE IF EXISTS {table_name}"
+        with self.connect_to_database(self.database) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                conn.commit()
+    
     def insert_data(self, table_name: str, data: Dict[str, Any]):
         columns = ', '.join(data.keys())
         placeholders = ', '.join(['%s'] * len(data))
@@ -124,10 +147,18 @@ if __name__ == "__main__":
         user_id INT,
         friend_id INT,
         relationship_type VARCHAR(50),
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (friend_id) REFERENCES users(id),
         PRIMARY KEY (user_id, friend_id)
     """
     rds.create_table('users', user_table_schema)
     rds.create_table('relationships', relationship_table_schema)
+
+    # list tables
+    print(rds.list_tables())
+
+    # describe tables
+    print(rds.describe_table('relationships'))
 
     # Insert data into the users table
     user_data = [
@@ -166,3 +197,14 @@ if __name__ == "__main__":
     # Verify the relationship has been deleted
     deleted_relationship = rds.read_data('relationships', conditions)
     print("Deleted Relationship:", deleted_relationship)
+
+    # Search for users based on a search term
+    search_results = rds.search_data('users', "john", ["username", "email", "full_name", "metadata"])
+    print("Search Results:", search_results)
+
+    # Delete the relationships table
+    rds.delete_table('relationships')
+    
+    # Verify the table has been deleted
+    tables_after_deletion = rds.list_tables()
+    print("Tables after deletion:", tables_after_deletion)
