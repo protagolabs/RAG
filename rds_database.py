@@ -109,10 +109,10 @@ if __name__ == "__main__":
     databases = rds.list_databases()
     print("Databases:", databases)
     
-    # Connect to the database
+    # Connect to the 'rag' database
     rds.connect_to_database(rds.database)
 
-    # Define table schema and create a users table
+    # Define table schema and create users and relationships tables without foreign key constraints
     user_table_schema = """
         id INT PRIMARY KEY,
         username VARCHAR(255) NOT NULL,
@@ -120,41 +120,49 @@ if __name__ == "__main__":
         full_name VARCHAR(255) NOT NULL,
         metadata TEXT
     """
+    relationship_table_schema = """
+        user_id INT,
+        friend_id INT,
+        relationship_type VARCHAR(50),
+        PRIMARY KEY (user_id, friend_id)
+    """
     rds.create_table('users', user_table_schema)
+    rds.create_table('relationships', relationship_table_schema)
 
     # Insert data into the users table
-    user_data = {
-        "id": 1,
-        "username": "john_doe",
-        "email": "john@example.com",
-        "full_name": "John Doe",
-        "metadata": "user profile data"
-    }
-    rds.insert_data('users', user_data)
+    user_data = [
+        {"id": 1, "username": "john_doe", "email": "john@example.com", "full_name": "John Doe", "metadata": "user profile data"},
+        {"id": 2, "username": "jane_smith", "email": "jane@example.com", "full_name": "Jane Smith", "metadata": "user profile data"}
+    ]
+    for user in user_data:
+        rds.insert_data('users', user)
     
-    # Read data from the users table
-    conditions = {"id": 1}
-    user_profile = rds.read_data('users', conditions)
-    print("User Profile:", user_profile)
-
-    # Update data in the users table
-    updated_data = {
-        "email": "john_doe_updated@example.com",
-        "full_name": "John Doe Updated"
+    # Insert data into the relationships table
+    relationship_data = {
+        "user_id": 1,
+        "friend_id": 2,
+        "relationship_type": "friend"
     }
-    rds.update_data('users', updated_data, conditions)
+    rds.insert_data('relationships', relationship_data)
 
-    # Read the updated user profile
-    updated_user_profile = rds.read_data('users', conditions)
-    print("Updated User Profile:", updated_user_profile)
+    # Read data from the relationships table
+    conditions = {"user_id": 1}
+    user_relationships = rds.read_data('relationships', conditions)
+    print("User Relationships:", user_relationships)
 
-    # Delete data from the users table
-    rds.delete_data('users', conditions)
+    # Update data in the relationships table
+    updated_relationship_data = {
+        "relationship_type": "best_friend"
+    }
+    rds.update_data('relationships', updated_relationship_data, conditions)
 
-    # Verify the user has been deleted
-    deleted_user_profile = rds.read_data('users', conditions)
-    print("Deleted User Profile:", deleted_user_profile)
+    # Read the updated relationships
+    updated_user_relationships = rds.read_data('relationships', conditions)
+    print("Updated User Relationships:", updated_user_relationships)
 
-    # Search for users based on a search term
-    search_results = rds.search_data('users', "john", ["username", "email", "full_name", "metadata"])
-    print("Search Results:", search_results)
+    # Delete data from the relationships table
+    rds.delete_data('relationships', conditions)
+
+    # Verify the relationship has been deleted
+    deleted_relationship = rds.read_data('relationships', conditions)
+    print("Deleted Relationship:", deleted_relationship)
