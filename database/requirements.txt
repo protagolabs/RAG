@@ -1,7 +1,7 @@
 # requirements.txt
 
 # Database connectors
-pymysq
+pymysql
 redis
 pymongo
 pymilvus
