@@ -1,7 +1,8 @@
 import json
+from datasets import load_dataset
 
 # Read the text file
-with open('dialogues_text.txt', 'r') as file:
+with open('dialogues_test.txt', 'r') as file:
     lines = file.readlines()
 
 # Function to convert a conversation line into a JSON object with speaker info
@@ -34,9 +35,16 @@ for line in lines:
     json_obj = convert_to_json_with_speakers(line)
     json_list.append(json_obj)
 
+path_to_jsonl = 'conversations_test.jsonl'
 # Write the JSON objects to a JSONL file
-with open('conversations_with_speakers.jsonl', 'w') as jsonl_file:
+with open(path_to_jsonl, 'w') as jsonl_file:
     for json_obj in json_list:
         jsonl_file.write(json.dumps(json_obj, ensure_ascii=False) + '\n')
 
 print("Conversion to JSONL with speakers completed.")
+
+
+# Load your dataset
+dataset = load_dataset('json', data_files=path_to_jsonl)
+
+dataset.push_to_hub("elricwan/dailydialog_test", private=False)
