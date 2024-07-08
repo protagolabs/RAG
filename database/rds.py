@@ -74,15 +74,29 @@ class MySQLConnection:
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 conn.commit()
-    
-    def insert_data(self, table_name: str, data: Dict[str, Any]):
-        columns = ', '.join(data.keys())
-        placeholders = ', '.join(['%s'] * len(data))
-        query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+
+    def insert_data(self, table_name: str, data: Dict[str, Any], primary_key: str = 'id'):
         with self.connect_to_database(self.database) as conn:
             with conn.cursor() as cursor:
+                # Check if the record exists
+                if primary_key in data:
+                    cursor.execute(f"SELECT 1 FROM {table_name} WHERE {primary_key} = %s", (data[primary_key],))
+                    if cursor.fetchone():
+                        # If a record is found, return without inserting
+                        print("Record already exists. No insertion performed.")
+                        return
+                
+                # Construct the insert query
+                columns = ', '.join(data.keys())
+                placeholders = ', '.join(['%s'] * len(data))
+                query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+                
+                # Execute the insert query
                 cursor.execute(query, list(data.values()))
                 conn.commit()
+                print("Record inserted successfully.")
+
+
 
     def read_data(self, table_name: str, conditions: Dict[str, Any]) -> List[Dict[str, Any]]:
         where_clause = ' AND '.join([f"{key} = %s" for key in conditions.keys()])
