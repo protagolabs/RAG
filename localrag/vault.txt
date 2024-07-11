@@ -1,0 +1,39 @@
+Medal raises $13M as it builds out a contextual AI assistant for desktop
+
+Medal, a startup that is better known for its video game clipping product, just announced that it has raised $13 million at a valuation of $333 million from several investors, including Horizons Ventures, OMERS Ventures, peak6 and Arcadia Investment Partners.
+
+The company also unveiled Highlight, a new cross-platform desktop app that acts as a contextual AI assistant for users. The app captures the content on your screen and lets you ask questions to a Large Language Model (LLM) based on that context.
+
+Henry Gladwyn, a partner at OMERS Ventures, told TechCrunch over a call that the venture firm saw an opportunity to use Medal’s core technology and apply it to LLMs.
+
+“So the core Medal technology is based around the idea of understanding what’s going on on somebody’s device, whether that be the video, the audio, and the stuff going on around it. That was originally used for clipping. Now, the company is taking that tech and applying that to LLMs for prompting, which is a clever use, ” Gladwyn said.
+
+Gladwyn added that he saw Medal as a product for recording the best bits of virtual life rather than just a gaming company. And the Highlight app is a natural extension of that paradigm.
+
+How does Highlight work?
+Over the years, companies have tried to build a useful assistant for users that utilizes on-screen information. Google has been trying for years with Google Now, Google Assistant, and now Gemini. Apple made a foray into this area when it launched Apple Intelligence and its ability to understand on-screen contextual information last month at its Worldwide Developer Conference (WWDC). Microsoft is also leveraging generative AI with Windows Recall, a feature that helps users find content they’ve viewed in the past — after the initial announcement, Microsoft decided to postpone the launch of Recall.
+
+Highlight is trying to make this happen for the desktop. In the current iteration, the app lives as a floating button on your desktop. Whenever you hover over the icon, it captures the content on the screen and passes it as context to different models. You can choose to ask other questions using different tools such as ChatGPT, Anthropic’s Claude, Perplexity, and more.
+
+Based on different models, the app pre-populates some of the questions to help you get started. The capture happens locally, and the app doesn’t store any content. The company is building its own ChatGPT-like assistant, which might be less capable than the cloud-based models for some tasks — but this assistant could eventually will run locally on your device.
+
+Apart from on-screen content, you can pass a document and system audio memory as context to Highlight as well. To utilize the audio use case, the company is building a local transcription app for meetings that is akin to tools like Granola, Limitless, and Krisp.
+
+Building Highlight
+Pim de Witte, one of the co-founders of Medal, told TechCrunch over a call that the company started thinking about how they could utilize Medal.tv’s clip capture tech and merge it with AI last year.
+
+“We know that recoding activities are going to be important for operating systems. And we have seen some big tech companies making such moves. We want to provide an open platform to connect users with assistants, models, and interfaces,” de Witte said.
+
+He also mentioned that he wanted to make an AI app that could be used by people of all ages, even if they are unaware of the technology. That’s why the app will show contextual prompt suggestions based on the capture.
+
+The company is also building an open platform for developers to deploy their own apps on the Highlight platform. This is somewhat equivalent to the Raycast launcher app for Mac, which lets you install extensions made by developers. However, a key difference is that Highlight is available on both Mac and Windows.
+
+OMERS Ventures’ Gladwyn said that because Highlights is independent and has no interest in drawing you into one ecosystem, it has an advantage.
+
+The path ahead
+Medal.tv is a successful product, and the company wants to continue supporting it and adding new features. However, the company will assign some staff to work on Highlight.
+
+Highlights is free for now, but de Witte wants to monetize it with the app store model. The startup is also exploring a premium subscription to give access to some of its own apps and features like local-first models.
+
+The company is also distributing grants of up to $30,000 for developers who will also get access to the Highlight team to develop the app ecosystem.
+
