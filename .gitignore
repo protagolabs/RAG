@@ -5,4 +5,8 @@
 **/.pytest_cache
 **/.env
 **/logs
-**/.env
+
+# ignore graphrag folder
+**/graphrag/
+**/paperag/pdf
+**/paperag/markdown

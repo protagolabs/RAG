@@ -1,0 +1,37 @@
+20 May 2024
+Today (20/05/2024), the Automated Vehicles Act 2024 received Royal Assent – marking a milestone in the regulation and adoption of autonomous vehicles (AVs).
+
+Parliamentary Passage
+The Act passed through parliament without any significant hitch or delay, likely due to the consensus surrounding the need to signal to prospective AV manufacturers and operators the UK's intent to introduce self-driving technologies.
+
+That being said, some amendments have been made, most notable of which are (additions in bold): 
+
+Section 2(2) – Statement of Safety Principles – the principles must now also be “framed with a view to securing that authorised automated vehicles will achieve a level of safety equivalent to, or higher than, that of careful and competent human drivers”.
+Section 2(4) – Statement of Safety Principles – requiring the Secretary of State, in preparing the statement, to consult organisations that appear to them to represent the interests of AV manufacturers, road users, and road safety.
+Other changes have been made since its introduction to the House of Lords in November 2023, but these mostly relate to less substantive points such as where the money from fines goes to, and dealing with how secondary legislation is passed (via affirmative and negative procedure).
+
+Importance of the Act
+The Act has seven parts, each briefly summarised below:
+
+Regulatory Scheme: Establishes principles and a framework for licensing self-driving vehicles; introduces the concept of an authorised self-driving entity (ASDE), who is the person that will be legally responsible; provides for the implementation of ‘no-user-in-charge’ (NUiC) vehicles; and finally, enforcement and sanctions. You can read more about this in our previous article here.
+Criminal Liability: Defines ‘user-in-charge’ (UiC), and then outlines their liability and circumstances in which they will benefit from immunity; also adds AV-specific offences.
+Policing and Investigation: Grants powers to stop and seize AVs; also introduces ‘automated vehicle incident inspectors’, whose chief function will be to identify factually the cause of incidents.
+Marketing Restrictions: Criminalises misuse of terminology that implies self-driving capabilities (both via a prescribed list and ‘terms likely to confuse’ road-users). You can read more about this in our previous article here.
+Automated Passenger Services Permits: Empowers authorities to grant permits; also exempts AVs from otherwise applicable taxi legislation. You can read more about this in our previous article here.
+Adapting Existing Regimes: Enables the Secretary of State to amend ‘type approval legislation’; also extends vehicle examiners’ powers to AVs, including allowing them to prohibit one from driving.
+General Provisions: Defines terms, and confirms scope across England, Wales, and Scotland.
+For a more detailed overview of the seven parts to the Act, see our initial commentary here.
+
+Timeline for implementation
+Whilst regulation of the technology has been nascent for many years, with the Act and incoming secondary legislation to give effect to the Act’s framework, regulation is now on the move in a positive direction which will be welcomed by those in the industry.
+
+That being said, some of this legislation will take time to take effect. On the Act’s return to the House of Lords on 8 May, Lord Davies noted that the secondary legislation would be launched in ‘the coming months’, building the new regulatory framework ‘piece by piece’. By way of time estimates, Lord Davies provided the following (in order of priority):
+
+Regulations on misleading marketing – consultation to commence later this year.
+Digitising traffic regulation orders – consultation to commence in the Autumn, with the aim of the legislation coming into force in Spring 2025.
+Initial work on the Statement of Safety Principles to begin this year – plan is to consult on this in 2025.
+Detailed regulations establishing authorisation, operator licensing and in-use regulation functions will follow later.
+Comment
+It will be of some assurance in an election year that the Act was passed with broad cross-party consensus and that there was alignment on the need to swiftly follow with work on secondary legislation, albeit there was a range of views expressed on approach (e.g. Bill Esterson MP (Shadow Roads Minister), in the Act’s passage through the Commons, argued in favour of an advisory council to implement the secondary legislation).
+
+Overall, the passing of the Act is much-welcomed by the industry – largely due to it providing the much called for certainty that industry requires to press forward with their AV roll-out plans in the UK with confidence.

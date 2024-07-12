@@ -139,6 +139,6 @@ if __name__ == "__main__":
     # print(result)
 
     # Path to your .jsonl file and output file
-    jsonl_file_path = '../sample_data/conversations_test.jsonl'
+    jsonl_file_path = 'sample_data/conversations_test.jsonl'
     output_json_path = 'results.json'
     process_jsonl_file(jsonl_file_path, output_json_path)

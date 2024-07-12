@@ -1,0 +1,32 @@
+How Dubai is tackling the challenges of autonomous vehicle development
+Amid regulatory concerns and technological difficulties, the pace of autonomous vehicle (AV) development has slowed in recent years. Entrepreneurs need access to the right facilities and support to facilitate the future of driverless transport.
+
+Forms of vehicle autonomy have existed since the mid-1990s with the introduction of adaptive cruise control (ACC), which could control the acceleration and deceleration of a car in response to the movement of a vehicle in front. In the 21st century, technology has developed well beyond this ‘Level 1’ autonomy, with 2023 seeing the first Level 3 vehicles from Mercedes-Benz hit the roads.
+
+Equipped with optical sensors and radar, this new generation of AVs can operate independently for a period, allowing the driver to take their eyes off the road until instructed to regain control. Looking to the future, Level 4 AVs, which can drive completely independently within a conditioned environment, and Level 5 AVs, able to operate anywhere without supervision, are no longer remote possibilities.
+
+However, the timeline for the general adoption of these vehicles has expanded in the face of technological and regulatory issues. GlobalData research predicts that, due to the current experimental nature of most prototypes, global sales of Level 4 and Level 5 AVs in 2030 are now expected to number only 250,000 units. However, within another decade this is predicted to rise to 4 million. There also remain concerns over the dangers posed by driverless vehicles after several high-profile accidents. AV projects need to be tested in the right environments and scaled with care if they are to be implemented more widely in the next few decades.
+
+Ensuring the safety and compliance of AV technology
+
+The greatest challenge currently facing AV development is a hostile regulatory environment and a lack of public trust, following fatal accidents caused partly by small failings in the autonomous systems involved.
+
+According to Sammy Chan, manager, Automotive Sales Forecast at GlobalData: “Even after accumulating millions of miles of AV driving experience technological progress advances relatively slowly, while setbacks are often severe and can derail a company’s quest towards fully autonomous driving.”
+
+Regulatory frameworks need to be in place to facilitate AV testing in a greater variety of driving conditions to prevent further accidents. The Level 3 Mercedes-Benz S-Class, launched last year, is only allowed to use its features on stretches of specific roads, for example a portion of motorway in Germany. Regulators across the globe, from the USA to the EU to Singapore, are currently adopting a cautious approach, although permission has been granted for vehicles without drivers in specific locations for testing purposes.
+
+Dubai’s plans to scale AV capabilities
+However, road systems and weather conditions can vary wildly from country to country, let alone from street to street. Deploying Level 4 and above AVs will be impossible without appropriate testing in diverse environments and the right regulatory frameworks. Dubai has become the first city in the Middle East to trial robotaxis, with the emirate deploying five fully autonomous electric taxis on a stretch of roads in the Jumeriah district in September 2023. The Dubai Roads and Transport Authority (RTA) plans to roll out 4,000 self-driving cars across the city by 2030 and anticipates that a quarter of all journeys within Dubai will be autonomous by that same year.
+
+But testing AVs in safe, urban districts is one thing; planning for the implementation of AVs across the world in a variety of environments is another. “Millions of autonomous driving miles have been amassed by the leaders in this space, but most of this has been in relatively safe operation environments, so it is not possible to extrapolate even successful tests to other more challenging locations,” Chan points out.
+
+Dubai is unique compared to other cities in the US and China that have tested AVs because of its desert climate. Understanding how AVs cope under the heat of an Arabian summer adds a further interesting dimension to the trial, alongside training AVs to operate in countries with different road systems and cultures. To improve the safety of all road users, it is key that the cars learn to recognise pedestrians that might be dressed differently from other countries, for example women in hijab.
+
+Meanwhile, Dubai Silicon Oasis (DSO), an economic zone affiliated with Dubai Integrated Economic Zones (DIEZ), is helping advance AV technology even further. September 2023 saw DSO host the Dubai World Congress for Self-Driving Transport, focused on developing autonomous buses. $2 million in prize money was shared between the promising startups King Long and BrightDrive, and a further $100,000 to students from Heriot-Watt University for their innovative ideas.
+
+27 countries submitted proposals for self-driving buses to the competition, and hopefuls were granted access to their own unique testing space in DSO to improve their projects. Complete with state-of-the-art laboratories, a network of maturing startups, and access to a talented student pool from the Rochester Institute of Technology in Dubai, DSO is emerging as an ideal place to test and scale new AV technology.
+
+Preparing for the autonomous vehicles of the future
+AVs are currently powered by computer vision, sensors, and 3D imaging, but there is the potential for their capabilities to be enhanced even further through the incorporation of light detection and ranging (LiDAR) technology. LiDAR can offer higher-resolution images and process data more quickly across a wider range of environmental conditions. However, it is also extremely expensive and bulky, making its incorporation into AVs more difficult.
+
+For the next generation of Level 4 AV capabilities to be unlocked, it is essential that the right ecosystems are in place to support innovation in the industry. Businesses based in DSO not only benefit from the DIEZ Venture Capital fund, Oraseya Capital, to finance their ideas, but a collaborative network of entrepreneurs and world-leading facilities for living and working too. With ample space for testing new projects in a safe environment, and the support of a forward-thinking government seeking to implement autonomous technology in a considerate way, DSO is tackling key challenges to enable a future driven by AVs.
