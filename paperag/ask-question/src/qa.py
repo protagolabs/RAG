@@ -103,9 +103,10 @@ def extract_dict_from_json(text: str):
 
         return extracted_text[0].strip() 
 
-# Example usage
-input_file = '../chunk/output.jsonl'
-output_file = 'output_answers.jsonl'
-question = "What is current state of autonomous vehicles in Urban Cities"
+if __name__ == "__main__":
+    # generate raw answers
+    input_file = '../chunk/output.jsonl'
+    output_file = 'jsonl/raw_answers.jsonl'  
+    question = "What is the current state of autonomous vehicles?"  
 
-map_reduce_documents(input_file, output_file, question)
+    map_reduce_documents(input_file, output_file, question)

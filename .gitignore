@@ -10,3 +10,7 @@
 **/graphrag/
 **/paperag/pdf
 **/paperag/markdown
+**/input
+
+# Ignore Jupyter notebook file
+**/test.ipynb

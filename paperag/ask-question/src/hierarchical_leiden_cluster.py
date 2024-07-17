@@ -55,7 +55,7 @@ def _stabilize_graph(graph: nx.Graph) -> nx.Graph:
     fixed_graph.add_edges_from(edges)
     return fixed_graph
 
-def run(graph: nx.Graph, max_cluster_size: int, levels: Optional[List[int]], seed=42) -> Dict[int, Dict[str, List[str]]]:
+def _run(graph: nx.Graph, max_cluster_size: int, levels: Optional[List[int]], seed=42) -> Dict[int, Dict[str, List[str]]]:
     """Run method definition."""
     use_lcc = True
     
@@ -127,16 +127,13 @@ def save_clusters_to_jsonl(graph, clustering_result, output_file):
                 value = list(unique_texts)
                 writer.write({key: value})
 
-if __name__ == "__main__":
-    
-    input_file1 = 'jsonl/resolution_entities.jsonl'
-    input_file2 = 'jsonl/resolution_relationships.jsonl'
-    # Define the output file
-    output_file = 'jsonl/hierarchical_cluster_result.jsonl'
-
-    with jsonlines.open(input_file1, mode='r') as reader:
+def process_and_cluster_entities(entity_file, relation_file, output_file, max_cluster_size=20):
+    # Read entities from input_file1
+    with jsonlines.open(entity_file, mode='r') as reader:
         entities = [doc for doc in reader]
-    with jsonlines.open(input_file2, mode='r') as reader:
+
+    # Read relationships from input_file2
+    with jsonlines.open(relation_file, mode='r') as reader:
         relationships = [doc for doc in reader]
 
     # Create a set of valid entity names
@@ -161,10 +158,16 @@ if __name__ == "__main__":
         G.add_edge(relationship['source'], relationship['target'], weight=float(1))
 
     # Run the clustering
-    clustering_result = run(G, 20, None)
-
-    # Print the clusters with original text for each level
-    #print_clusters_with_text(G, clustering_result)
+    clustering_result = _run(G, max_cluster_size, None)
 
     # Save the clusters with original text to JSONL
     save_clusters_to_jsonl(G, clustering_result, output_file)
+
+if __name__ == "__main__":
+    
+    entity_file = 'jsonl/resolution_entities.jsonl'
+    relation_file = 'jsonl/resolution_relationships.jsonl'
+    # Define the output file
+    output_file = 'jsonl/hierarchical_cluster_result.jsonl'
+
+    process_and_cluster_entities(entity_file, relation_file, output_file)
