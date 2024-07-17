@@ -3,7 +3,12 @@ import jsonlines
 from openai import OpenAI
 import torch
 import ollama
+import numpy as np
 import re
+import igraph as ig
+import leidenalg as la
+from sklearn.metrics.pairwise import cosine_similarity
+from collections import Counter
 
 # Define the tuple delimiter used in the input
 tuple_delimiter = "{tuple_delimiter}"
@@ -50,6 +55,30 @@ def parse_input(data):
     
     return entities, relationships
 
+# remove duplicated based on name and type
+def remove_duplicates(tuples_list):
+    unique_items = {}
+    for item in tuples_list:
+        name = item[0]
+        if name not in unique_items:
+            unique_items[name] = item
+    return list(unique_items.values())
+
+# Function to calculate embedding for each point
+def calculate_embedding(point):
+    embedding = ollama.embeddings(model='mxbai-embed-large', prompt=point)["embedding"]
+    return embedding
+
+# in each group, find the most common name as the entity name
+def most_common_or_first(my_list):
+    if not my_list:
+        return None
+    
+    counter = Counter(my_list)
+    most_common = counter.most_common(1)
+    
+    return most_common[0][0] if most_common else my_list[0]
+
 def compare_entities(entity1, entity2):
     prompt = f"""Compare the following two entities, you job is to determine if the entity are the same based on your undersanding of the description and type.
     
@@ -72,61 +101,78 @@ def compare_entities(entity1, entity2):
         temperature=0.1,
     )
     answer = response.choices[0].message.content.lower()
+    
     if 'yes' in answer:
         return True
     return False
 
-def merge_entities_and_relationships(input_file, output_file):
+def entities_and_relationships_resolution(input_file, output_file):
     # Read input JSONL file
     data = read_jsonl(input_file)
 
     # Parse the input data
     entities, relationships = parse_input(data)
 
-    # Merge entities based on comparison
-    merged_entities = []
-    skip_indices = set()
+    # Remove duplicates based on name 
+    unique_entities = remove_duplicates(entities)
+
+    # calculate embeddings for each entity
+    for i, entity in enumerate(unique_entities):
+        embedding = calculate_embedding('name: ' + entity[0] + 'type: ' + entity[1] + 'description: ' + entity[2])
+        unique_entities[i] = (entity[0], entity[1], entity[2], entity[3], embedding)
+
+    # Calculate embeddings for all entity
+    embeddings = np.array([entity[4] for entity in unique_entities])
+
+    # Construct similarity graph using cosine similarity
+    similarity_matrix = cosine_similarity(embeddings)
+    np.fill_diagonal(similarity_matrix, 0)  # Remove self-similarity
+    edges = np.argwhere(similarity_matrix > 0)
+    weights = similarity_matrix[edges[:, 0], edges[:, 1]]
+
+    # Create igraph graph
+    g = ig.Graph()
+    g.add_vertices(len(unique_entities))
+    g.add_edges(edges)
+    g.es['weight'] = weights
+
+    # Apply Leiden Algorithm
+    partition = la.find_partition(g, la.CPMVertexPartition, weights='weight', resolution_parameter=1.5)
+
+
+    # Organize entity by cluster labels
+    clusters = {}
+    for idx, cluster_id in enumerate(partition.membership):
+        if cluster_id not in clusters:
+            clusters[cluster_id] = []
+        clusters[cluster_id].append(unique_entities[idx])
+    
+    # Entity Resolution
     entity_mapping = {}
 
-    for i, entity1 in enumerate(entities):
-        if i in skip_indices:
-            continue
-        # Start with the current entity
-        merged_entity = entity1
-        
-        for j in range(i + 1, len(entities)):
-            if j in skip_indices:
-                continue
-            
-            entity2 = entities[j]
-            if compare_entities(entity1, entity2):
-                # Add index j to skip_indices since entity2 is being merged
-                skip_indices.add(j)
+    for key in clusters:
+        group = clusters[key]
+        names = [item[0] for item in group]
+        common_value = most_common_or_first(names)
+        for name in names:
+            entity_mapping[name] = common_value
 
-                # Record the mapping of the removed entity to the remaining entity
-                entity_mapping[entity2] = entity1
-                
-                # Optional: Update merged_entity based on your merge logic
-                # For instance, here we simply retain entity1's data.
-                # If you have a specific merge logic, implement it here.
-
-        merged_entities.append(merged_entity)
-
-    # Normalize entities
+    # Entity Resolution
     normalized_entities = [
-        {
-            "name": name,
-            "type": entity_type,
-            "description": description,
-            "original_text": original_text
-        }
-        for name, entity_type, description, original_text in merged_entities
+    {
+        "name": entity_mapping.get(name, name),
+        "type": entity_type,
+        "description": description,
+        "original_text": original_text
+    }
+    for name, entity_type, description, original_text in entities
     ]
+
     # Normalize and adjust relationships
     normalized_relationships = []
 
     for relationship in relationships:
-        source, target, description, strength, original_text = relationship.values()
+        source, target, description, strength, original_text = relationship
         normalized_source = entity_mapping[source] if source in entity_mapping else source
         normalized_target = entity_mapping[target] if target in entity_mapping else target
         normalized_relationships.append({
@@ -143,9 +189,9 @@ def merge_entities_and_relationships(input_file, output_file):
     relationship_output_file = output_file.replace('.jsonl', '_relationships.jsonl')
 
     # Write to output JSONL file
-    write_jsonl(normalized_entities, entity_output_file)
-    write_jsonl(normalized_relationships, relationship_output_file)
-    print(f'Merged entities and relationships have been written to {output_file}')
+    write_jsonl(entity_output_file, normalized_entities)
+    write_jsonl(relationship_output_file, normalized_relationships)
+    print(f'Resolution entities and relationships have been written to {output_file}')
 
     # save entity_map for debugging
     with open('jsonl/entity_mapping.json', 'w') as json_file:
@@ -155,8 +201,8 @@ def merge_entities_and_relationships(input_file, output_file):
 
 if __name__ == "__main__":
     input_file = 'jsonl/raw_entity.jsonl'
-    output_file = 'jsonl/merge.jsonl'
+    output_file = 'jsonl/resolution.jsonl'
 
-    merge_entities_and_relationships(input_file, output_file)
+    entities_and_relationships_resolution(input_file, output_file)
 
     

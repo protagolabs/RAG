@@ -36,6 +36,8 @@ def extract_entity(document):
 
     4. When finished, output {{completion_delimiter}}
 
+    5. IMPORTANT: DO NOT USE acronyms or abbreviations. Write out the full name of the entity. Even the original text uses an acronym, write out the full name of the entity if you know it.
+
     ######################
     -Examples-
     ######################
