@@ -20,7 +20,8 @@ def ask_question(document, question):
 
     ---Goal---
 
-    Generate a response consisting of a list of key points that responds to the user's question, summarizing all relevant information from the provided paragraph.
+    Generate a response consisting of a list of key points that responds to the user's question, you should remove all irrelevant information, only focus on the question. If the question is not answerable, respond with "I don't know."
+    If the document cannot be used to answer the question, respond with "I don't know.".
     
     Each key point in the response should have the following element:
     - Description: A comprehensive description of the point.
@@ -93,6 +94,8 @@ def map_reduce_documents(input_file, output_file, question):
     with jsonlines.open(output_file, mode='w') as writer:
         for result in results:
             writer.write(result)
+
+    #return results
 
 def extract_dict_from_json(text: str):
         """

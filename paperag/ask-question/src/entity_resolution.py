@@ -51,7 +51,10 @@ def parse_input(data):
             if parts[0] == "entity":
                 entities.append((parts[1], parts[2], parts[3], record['document']))
             elif parts[0] == "relationship":
-                relationships.append((parts[1], parts[2], parts[3], int(parts[4]), record['document']))
+                try:
+                    relationships.append((parts[1], parts[2], parts[3], int(parts[4]), record['document']))
+                except:
+                    relationships.append((parts[1], parts[2], parts[3], 1, record['document']))
     
     return entities, relationships
 
