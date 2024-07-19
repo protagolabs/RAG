@@ -19,7 +19,7 @@ if __name__ == "__main__":
     
     # extract entity
     raw_entity_file = 'jsonl/raw_entity.jsonl'  
-    save_entity(raw_summary_file, raw_entity_file)
+    #save_entity(raw_summary_file, raw_entity_file)
 
     # entity resolution
     resolution_file = 'jsonl/resolution.jsonl'

@@ -2,14 +2,35 @@ import json
 import jsonlines
 from openai import OpenAI
 import torch
-import ollama
+import os
 import numpy as np
 import re
-import igraph as ig
-import leidenalg as la
-from sklearn.metrics.pairwise import cosine_similarity
-from collections import Counter, defaultdict
+import copy
+from collections import defaultdict
+from dotenv import load_dotenv
 
+
+# Load environment variables
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+def generate_feature_engineer_templates(FEATURE_ENGINEER, document_text):
+    """
+    Generates FEATURE_ENGINEER template with substituted texts.
+    
+    """
+
+    # Deep copy the original template to avoid modifying it
+    updated_template = copy.deepcopy(FEATURE_ENGINEER)
+        
+    # Substitute the placeholder in the user document
+    for entry in updated_template:
+        if entry["role"] == "user":
+            entry["content"] = entry["content"].format(document=document_text)
+    
+    return updated_template
 
 # Define the tuple delimiter used in the input
 tuple_delimiter = "{tuple_delimiter}"
@@ -23,11 +44,6 @@ def standardize_delimiter(input_string, standard_delimiter="{tuple_delimiter}"):
     
     return standardized_string
 
-# Initialize the LLM client
-client = OpenAI(
-    base_url='http://localhost:11434/v1',
-    api_key='gemma2'
-)
 
 # Function to read the JSONL file
 def read_jsonl(file_path):
@@ -62,50 +78,26 @@ def remove_duplicates(tuples_list):
     for item in tuples_list:
         name = item[0]
         if name not in unique_items:
-            unique_items[name] = item
+            unique_items[name] = (item[0],item[1].lower(),item[2])
     return list(unique_items.values())
 
-# Function to calculate embedding for each point
-def calculate_embedding(point):
-    embedding = ollama.embeddings(model='mxbai-embed-large', prompt=point)["embedding"]
-    return embedding
 
-# in each group, find the most common name as the entity name
-def most_common_or_first(my_list):
-    if not my_list:
-        return None
+def compare_entities(messages):
     
-    counter = Counter(my_list)
-    most_common = counter.most_common(1)
-    
-    return most_common[0][0] if most_common else my_list[0]
-
-def compare_entities(entity1, entity2):
-    prompt = f"""Compare the following two entities, you job is to determine if the entity are the same based on your undersanding of the description and type.
-    
-    Entity 1:
-    Name: {entity1[0]}
-    Type: {entity1[1]}
-    Description: {entity1[2]}
-    
-    Entity 2:
-    Name: {entity2[0]}
-    Type: {entity2[1]}
-    Description: {entity2[2]}
-    
-    Are these entities the same? Answer 'yes' or 'no'."""
-    
+    # Send the prompt to OpenAI's GPT-4
     response = client.chat.completions.create(
-        model='gemma2',
-        messages=[{"role": "system", "content": prompt}],
-        max_tokens=2000,
-        temperature=0.1,
+        model="gpt-4o",
+        messages=messages,
+        max_tokens=1000,
+        n=1,
+        stop=None,
+        temperature=0.7
     )
-    answer = response.choices[0].message.content.lower()
+
+    answer = response.choices[0].message.content
     
-    if 'yes' in answer:
-        return True
-    return False
+    return answer
+    
 
 def entities_and_relationships_resolution(input_file, output_file):
     # Read input JSONL file
@@ -117,47 +109,29 @@ def entities_and_relationships_resolution(input_file, output_file):
     # Remove duplicates based on name 
     unique_entities = remove_duplicates(entities)
 
-    # calculate embeddings for each entity
-    for i, entity in enumerate(unique_entities):
-        embedding = calculate_embedding('name: ' + entity[0] + 'type: ' + entity[1] + 'description: ' + entity[2])
-        unique_entities[i] = (entity[0], entity[1], entity[2], entity[3], embedding)
+    # Group entities by type
+    # Initialize a dictionary to group by type
+    grouped_data = defaultdict(list)
 
-    # Calculate embeddings for all entity
-    embeddings = np.array([entity[4] for entity in unique_entities])
+    # Iterate through the original list and group by type
+    for item in unique_entities:
+        _, item_type, description = item
+        grouped_data[item_type].append(item)
 
-    # Construct similarity graph using cosine similarity
-    similarity_matrix = cosine_similarity(embeddings)
-    np.fill_diagonal(similarity_matrix, 0)  # Remove self-similarity
-    edges = np.argwhere(similarity_matrix > 0)
-    weights = similarity_matrix[edges[:, 0], edges[:, 1]]
-
-    # Create igraph graph
-    g = ig.Graph()
-    g.add_vertices(len(unique_entities))
-    g.add_edges(edges)
-    g.es['weight'] = weights
-
-    # Apply Leiden Algorithm
-    partition = la.find_partition(g, la.CPMVertexPartition, weights='weight', resolution_parameter=2.0)
-
-
-    # Organize entity by cluster labels
-    clusters = {}
-    for idx, cluster_id in enumerate(partition.membership):
-        if cluster_id not in clusters:
-            clusters[cluster_id] = []
-        clusters[cluster_id].append(unique_entities[idx])
-    
     # Entity Resolution
     entity_mapping = {}
     entity2doc = defaultdict(list)
 
-    for key in clusters:
-        group = clusters[key]
-        names = [item[0] for item in group]
-        common_value = most_common_or_first(names)
-        for name in names:
-            entity_mapping[name] = common_value
+    for key in grouped_data:
+        document = str(grouped_data[key])
+        updated_template = generate_feature_engineer_templates(ENTITY_RESOLUTION, document)
+        answer = compare_entities(updated_template)
+        answer = answer.split('\n')
+        for ans in answer:
+            if '{{same}}' in ans:
+                ans = ans.split('{{same}}')
+                for i in range(1,len(ans)):
+                    entity_mapping[ans[i].strip()] = ans[0].strip()
 
     # Entity Resolution    
     normalized_entities = [
@@ -209,6 +183,49 @@ def entities_and_relationships_resolution(input_file, output_file):
         json.dump(entity2doc, json_file, indent=4)
 
     print("Dictionary saved to entity_resolution_mapping.json")
+
+ENTITY_RESOLUTION = [
+    {"role" : "system",
+     "content": """
+        ---Role---
+        You are an assistant with expertise in natural language processing and entity resolution.
+
+        ---Goal---
+        Your task is to identify and point out entities within the provided document that refer to the same entity, even if their names are slightly different. The goal is to group these entities together for clarity and consistency.
+
+        ---Guidelines---
+        - Carefully read through the document and identify entities of the specified type that refer to the same thing.
+        - Compare descriptions to ensure accurate grouping.
+        - Provide the output in the format: 
+        name_x {{same}} name_o {{same}} name_g
+        name_ww {{same}} name_x
+        - Ensure accuracy and completeness in grouping the entities.
+        - Each time, you will be given a single type of entity to determine.
+        - When finished, output {{completion_delimiter}}
+
+        ---Example---
+        Input: 
+        [('MR. DURSELY', 'person', 'Mr. Dursley is a director of a drilling firm and takes pride in his normality.'),
+        ('MR. DURSLEY', 'person', "Mr. Dursley is Harry Potter's uncle and a non-magical person who disbelieves in anything supernatural."),
+        ('HARRY', 'person', 'Harry is a young wizard known for defeating Voldemort as a baby and later facing him multiple times.'),
+        ('HARRY POTTER', 'person', "Harry Potter is a young wizard known for surviving Lord Voldemort's attack as a baby. He is famous throughout the wizarding world for his bravery and magical abilities.")]
+        
+        Output: 
+        MR. DURSELY {{same}} MR. DURSLEY
+        HARRY {{same}} HARRY POTTER
+
+         {{completion_delimiter}}
+
+        
+
+    """},
+    {"role": "user",
+    "content": """
+        ---Input---
+        Here is the document: 
+
+        {document}
+"""}]
 
 if __name__ == "__main__":
     input_file = 'jsonl/raw_entity.jsonl'
