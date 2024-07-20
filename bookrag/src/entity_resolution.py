@@ -16,14 +16,14 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-def generate_feature_engineer_templates(FEATURE_ENGINEER, document_text):
+def generate_feature_engineer_templates(ENTITY_RESOLUTION, document_text):
     """
     Generates FEATURE_ENGINEER template with substituted texts.
     
     """
 
     # Deep copy the original template to avoid modifying it
-    updated_template = copy.deepcopy(FEATURE_ENGINEER)
+    updated_template = copy.deepcopy(ENTITY_RESOLUTION)
         
     # Substitute the placeholder in the user document
     for entry in updated_template:
@@ -76,20 +76,21 @@ def parse_input(data):
 def remove_duplicates(tuples_list):
     unique_items = {}
     for item in tuples_list:
-        name = item[0]
+        name, typ = item[0],item[1]
         if name not in unique_items:
             unique_items[name] = (item[0],item[1].lower(),item[2])
+        # if (name,typ) not in unique_items:
+        #     unique_items[(name,typ)] = (item[0],item[1].lower(),item[2])
     return list(unique_items.values())
 
 
-def compare_entities(messages):
+def run_openai(messages):
     
     # Send the prompt to OpenAI's GPT-4
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages,
         max_tokens=1000,
-        n=1,
         stop=None,
         temperature=0.7
     )
@@ -121,11 +122,12 @@ def entities_and_relationships_resolution(input_file, output_file):
     # Entity Resolution
     entity_mapping = {}
     entity2doc = defaultdict(list)
+    entity2description = defaultdict(list)
 
     for key in grouped_data:
         document = str(grouped_data[key])
         updated_template = generate_feature_engineer_templates(ENTITY_RESOLUTION, document)
-        answer = compare_entities(updated_template)
+        answer = run_openai(updated_template)
         answer = answer.split('\n')
         for ans in answer:
             if '{{same}}' in ans:
@@ -148,6 +150,7 @@ def entities_and_relationships_resolution(input_file, output_file):
     # collect the doc_id for each entity
     for entity in normalized_entities:
         entity2doc[entity['name']].append(entity['doc_id'])
+        entity2description[entity['name']].append(entity['description'])
 
     # Normalize and adjust relationships
     normalized_relationships = []
@@ -178,9 +181,10 @@ def entities_and_relationships_resolution(input_file, output_file):
     # save entity_map for debugging
     with open('jsonl/entity_resolution_mapping.json', 'w') as json_file:
         json.dump(entity_mapping, json_file, indent=4)
-     # save entity_map for debugging
     with open('jsonl/entity_to_doc.json', 'w') as json_file:
         json.dump(entity2doc, json_file, indent=4)
+    with open('jsonl/entity_to_description.json', 'w') as json_file:        
+        json.dump(entity2description, json_file, indent=4)
 
     print("Dictionary saved to entity_resolution_mapping.json")
 

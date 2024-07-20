@@ -1,5 +1,5 @@
 from src.chunk import process_folder
-from src.summary import process_summarize
+from src.summary import process_summarize, process_summarize_entity
 from src.extract_entity import save_entity
 from src.entity_resolution import entities_and_relationships_resolution
 
@@ -24,3 +24,11 @@ if __name__ == "__main__":
     # entity resolution
     resolution_file = 'jsonl/resolution.jsonl'
     #entities_and_relationships_resolution(raw_entity_file, resolution_file)
+
+    # summarize entity
+    entity_input_file = 'jsonl/resolution_entities.jsonl'
+    entity_summary_file = 'jsonl/resolution_entity_summary.jsonl'
+    #process_summarize_entity(entity_input_file, entity_summary_file)
+
+    # hierarchical leiden clustering
+    

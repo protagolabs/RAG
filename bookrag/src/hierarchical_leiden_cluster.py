@@ -154,8 +154,8 @@ def process_and_cluster_entities(entity_file, relation_file, output_file, max_cl
 
     # Add relationships as edges with float weights
     for relationship in filtered_relationships:
-        #G.add_edge(relationship['source'], relationship['target'], weight=float(relationship['strength']))
-        G.add_edge(relationship['source'], relationship['target'], weight=float(1))
+        G.add_edge(relationship['source'], relationship['target'], weight=float(relationship['strength']))
+        #G.add_edge(relationship['source'], relationship['target'], weight=float(1))
 
     # Run the clustering
     clustering_result = _run(G, max_cluster_size, None)

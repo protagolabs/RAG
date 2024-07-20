@@ -1,8 +1,11 @@
 import json
 import jsonlines
 from openai import OpenAI
+from collections import defaultdict
+import copy
 import torch
 import ollama
+from .entity_resolution import run_openai
 
 # Initialize the LLM client
 client = OpenAI(
@@ -10,7 +13,7 @@ client = OpenAI(
     api_key='gemma2'
 )
 
-def summarize_text(document, max_tokens=500, encoding_name='cl100k_base'):
+def summarize_text(document, max_tokens=500):
     prompt = f"""
     ---Role---
     You are an expert summarizer with a deep understanding of hierarchical argument structures.
@@ -71,6 +74,7 @@ def summarize_text(document, max_tokens=500, encoding_name='cl100k_base'):
     
     return answer
 
+
 def process_summarize(input_file, output_file):
     # Read the input JSONL file
     with jsonlines.open(input_file, mode='r') as reader:
@@ -87,5 +91,76 @@ def process_summarize(input_file, output_file):
     with jsonlines.open(output_file, mode='w') as writer:
         for result in results:
             writer.write(result)
+
+
+###########################################
+# Entity Summary with openai
+###########################################
+
+def generate_templates(ENTITY_SUMMARY, entity_name, description_list):
+    """
+    Generates template with substituted texts.
     
+    """
+
+    # Deep copy the original template to avoid modifying it
+    updated_template = copy.deepcopy(ENTITY_SUMMARY)
+        
+    # Substitute the placeholder in the user document
+    for entry in updated_template:
+        if entry["role"] == "user":
+            entry["content"] = entry["content"].format(entity_name=entity_name,description_list=description_list)
     
+    return updated_template
+
+
+def process_summarize_entity(input_file, output_file):
+    # Read the input JSONL file
+    with jsonlines.open(input_file, mode='r') as reader:
+        entities = [doc for doc in reader]
+    
+    entity_combine = defaultdict(list)
+    for entity in entities:
+        entity_name, entity_type, description, original_text, doc_id, filename = entity.values()
+        entity_combine[entity_name].append((entity_type, description, original_text, doc_id, filename))
+        
+    # summarize text
+    results = []
+    for key in entity_combine:
+        entity_name = key
+        value = entity_combine[key]
+        description = [vv[1] for vv in value]
+        description_list = '\n'.join(description)
+
+        updated_template = generate_templates(ENTITY_SUMMARY, entity_name, description_list)
+        answer = run_openai(updated_template)
+
+        doc_id = [vv[3] for vv in value]
+        filename = {vv[4] for vv in value}
+        results.append({'doc_id': doc_id,'filename': filename, 'name': entity_name, 'type':value[0][0],'entity_descritpion_summary': answer})
+    
+    # Reduce step: write the results to the output JSONL file
+    with jsonlines.open(output_file, mode='w') as writer:
+        for result in results:
+            writer.write(result)
+
+ENTITY_SUMMARY = [
+    {"role" : "system",
+     "content": """
+    You are a helpful assistant responsible for generating a comprehensive summary of the entity provided below.
+    Given one entity, and a list of descriptions, all related to the same entity. Entity name could be various forms of the same entity in the descriptions.
+    Please concatenate all of these into a single, comprehensive description. Using the same entity name as given.
+    Make sure to include information collected from all the descriptions.
+    If the provided descriptions are contradictory, please resolve the contradictions and provide a single, coherent summary.
+    Make sure it is written in third person, and include the entity names so we the have full context.
+
+    """},
+    {"role": "user",
+    "content": """
+        #######
+        -Data-
+        Entities: {entity_name}
+        Description List: {description_list}
+        #######
+        Output:
+"""}]
