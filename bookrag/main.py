@@ -39,5 +39,9 @@ if __name__ == "__main__":
 
     # query to entity
     output_file = 'jsonl/query_to_entity.jsonl'
-    Query = 'Who are the friend of Harry Potter?'
+    #Query = 'Who are the friend of Harry Potter?'
+    Query = 'Who is the stongest person?'
     process_query_to_entity(Query, output_file)
+
+    # findout doc_id based on query and filter them based on query
+

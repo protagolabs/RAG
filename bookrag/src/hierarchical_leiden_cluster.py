@@ -221,6 +221,15 @@ def process_and_cluster_entities(entity_file, relation_file, output_file, max_cl
     # Read relationships from input_file2
     with jsonlines.open(relation_file, mode='r') as reader:
         relationships = [doc for doc in reader]
+    
+    # Read entity_map to find variant of same entities
+    entity_map_file = 'jsonl/entity_resolution_mapping.json'
+    with open(entity_map_file, 'r') as file:
+        entity_map = json.load(file)
+    entity_map_reverse = defaultdict(list)
+    for key in entity_map:
+        value = entity_map[key]
+        entity_map_reverse[value].append(key)
 
     # Create a set of valid entity names
     valid_entity_names = {entity['name'] for entity in entities}
@@ -235,7 +244,14 @@ def process_and_cluster_entities(entity_file, relation_file, output_file, max_cl
 
     entity_collection_name = "graphrag_entity_collection"
     relationship_collection_name = "graphrag_relationship_collection"
-    entity_embeddings = [(entity['name'], entity['type'], entity['entity_descritpion_summary'], calculate_embedding(entity['name'])) for entity in entities]
+
+    entity_embeddings = []
+    for entity in entities:
+        entity_embeddings.append((entity['name'], entity['type'], entity['entity_descritpion_summary'], calculate_embedding(entity['name'])))
+        value = entity_map_reverse.get(entity['name'], [])
+        for vvv in value:
+            entity_embeddings.append((vvv, entity['type'], entity['entity_descritpion_summary'], calculate_embedding(vvv)))
+    #entity_embeddings = [(entity['name'], entity['type'], entity['entity_descritpion_summary'], calculate_embedding(entity['name'])) for entity in entities]
     relationship_embeddings = [(relationship['source'], relationship['target'], relationship['description'], calculate_embedding(relationship['description'])) for relationship in filtered_relationships]
     initialize_and_insert_data(entity_collection_name, relationship_collection_name, entity_embeddings, relationship_embeddings)
     

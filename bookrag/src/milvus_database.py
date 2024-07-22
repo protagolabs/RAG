@@ -123,13 +123,29 @@ def initialize_and_insert_data(entity_collection_name, relationship_collection_n
     insert_entity_data(entity_collection_name, entities)
     insert_relationship_data(relationship_collection_name, relationships)
 
-
-def search_entity_by_embedding_and_type(collection_name: str, name_embedding: List[float], entity_type: str, top_k: int = 10):
+# Function to create an index for a collection
+def create_index(collection_name: str, field_name: str):
     try:
         collection = Collection(collection_name)
+        index_params = {
+            "index_type": "IVF_FLAT",
+            "params": {"nlist": 32},  # Number of clusters
+            "metric_type": "L2"  # Distance metric: Euclidean distance
+        }
+        collection.create_index(field_name=field_name, index_params=index_params)
+        collection.load()
+        print(f"Index created and collection '{collection_name}' loaded")
+    except Exception as e:
+        print(f"An error occurred while creating index for collection '{collection_name}': {e}")
+
+
+def search_entity_by_embedding_and_type(collection_name: str, name_embedding: List[float], entity_type: str, top_k: int = 1):
+    try:
+        collection = Collection(collection_name)
+        #collection.load()
         
         # Define search parameters
-        search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
+        search_params = {"metric_type": "L2", "params": {"nprobe": 2}}
         
         # Create an expression to filter by entity type
         expr = f"entity_type == '{entity_type}'"
@@ -152,6 +168,7 @@ def search_entity_by_embedding_and_type(collection_name: str, name_embedding: Li
 def search_relationship_by_embedding(collection_name: str, relation_embedding: List[float], top_k: int = 10):
     try:
         collection = Collection(collection_name)
+        #collection.load()
         
         # Define search parameters
         search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
@@ -170,8 +187,6 @@ def search_relationship_by_embedding(collection_name: str, relation_embedding: L
         print(f"An error occurred while searching relationships: {e}")
         return None
 
-    
-
 if __name__ == "__main__":
     # Example usage
     # Define collection names
@@ -179,25 +194,26 @@ if __name__ == "__main__":
     relationship_collection_name = "graphrag_relationship_collection"
 
     entities = [
-        ("entity1", "type1", "description1", [0.1] * 120),
-        ("entity2", "type2", "description2", [0.2] * 120)
+        ("entity1", "type1", "description1", [0.1] * 1024),
+        ("entity2", "type2", "description2", [0.2] * 1024)
     ]
 
     relationships = [
-        ("entity1", "entity2", "relationship1", [0.3] * 120),
-        ("entity2", "entity1", "relationship2", [0.4] * 120)
+        ("entity1", "entity2", "relationship1", [0.3] * 1024),
+        ("entity2", "entity1", "relationship2", [0.4] * 1024)
     ]
 
     #initialize_and_insert_data(entity_collection_name, relationship_collection_name, entities, relationships)
-    #connect_to_milvus()
+    connect_to_milvus()
+    create_index(entity_collection_name, "embedding_of_entity")
+    create_index(relationship_collection_name, "embedding_of_relation")
 
     # Example search parameters
-    # name_embedding = [0.1] * 120  # Example name embedding
-    # entity_type = "type1"  # Example entity type
+    name_embedding = [0.1] * 1024  # Example name embedding
+    entity_type = "type1"  # Example entity type
 
-    # # Perform the search
-    # collection_name = "entity_collection"
-    # results = search_entity_by_embedding_and_type(collection_name, name_embedding, entity_type)
+    # Perform the search
+    results = search_entity_by_embedding_and_type(entity_collection_name, name_embedding, entity_type)
 
     # # Print the results
     # for result in results:

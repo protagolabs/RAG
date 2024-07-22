@@ -7,7 +7,7 @@ import torch
 import ollama
 import networkx as nx
 from .entity_resolution import standardize_delimiter
-from .milvus_database import connect_to_milvus, search_entity_by_embedding_and_type, search_relationship_by_embedding
+from .milvus_database import connect_to_milvus, create_index, search_entity_by_embedding_and_type, search_relationship_by_embedding
 
 # Initialize the LLM client
 client = OpenAI(
@@ -121,6 +121,14 @@ def process_query_to_entity(Query, output_file):
     connect_to_milvus()
     entity_collection_name = "graphrag_entity_collection"
     relationship_collection_name = "graphrag_relationship_collection"
+    # Create indices for collections
+    create_index(entity_collection_name, "embedding_of_entity")
+    create_index(relationship_collection_name, "embedding_of_relation")
+
+    # Read entity_map to find variant of same entities
+    entity_map_file = 'jsonl/entity_resolution_mapping.json'
+    with open(entity_map_file, 'r') as file:
+        entity_map = json.load(file)
     
     answer = query_to_entity(Query)
     answer = answer.split('\n')
@@ -131,22 +139,27 @@ def process_query_to_entity(Query, output_file):
             if tuple_delimiter not in line:
                 continue
             entity_name, entity_type = line.split(tuple_delimiter)
-            if "Action" not in entity_type:
+            if "Action" in entity_type:
                 relation_embedding = calculate_embedding(entity_name)
                 relationship_results = search_relationship_by_embedding(relationship_collection_name, relation_embedding)
+                #print("Relationship search results:")
+                for hits in relationship_results:
+                    for result in hits:
+                        #print(result.get('relationship_description'))
+                        writer.write({'relationship_description': result.get('relationship_description')})
             else:
                 entity_name_embedding = calculate_embedding(entity_name)
                 entity_results = search_entity_by_embedding_and_type(entity_collection_name, entity_name_embedding, entity_type)
-            
-            if entity_results:
-                print("Entity search results:")
-                for result in entity_results:
-                    print(result)
+                #print("Entity search results:")
+                for hits in entity_results:
+                    for result in hits:
+                        original_name = result.get('entity_name')
+                        record_name = entity_map[original_name]
+                        #print(result.get('entity_name'))
+                        #print(result.get('entity_description'))
+                        writer.write({'entity_name': record_name, 'entity_type': entity_type,'entity_description': result.get('entity_description')})
 
-            if relationship_results:
-                print("Relationship search results:")
-                for result in relationship_results:
-                    print(result)
+            
             
 
 
