@@ -2,6 +2,8 @@ from src.chunk import process_folder
 from src.summary import process_summarize, process_summarize_entity
 from src.extract_entity import save_entity
 from src.entity_resolution import entities_and_relationships_resolution
+from src.hierarchical_leiden_cluster import process_and_cluster_entities
+from src.query2entity import process_query_to_entity
 
 if __name__ == "__main__":
 
@@ -31,4 +33,11 @@ if __name__ == "__main__":
     #process_summarize_entity(entity_input_file, entity_summary_file)
 
     # hierarchical leiden clustering
-    
+    relation_input_file = 'jsonl/resolution_relationships.jsonl'
+    cluster_file = 'jsonl/community_report.jsonl'
+    #process_and_cluster_entities(entity_summary_file, relation_input_file, cluster_file, max_cluster_size=10)
+
+    # query to entity
+    output_file = 'jsonl/query_to_entity.jsonl'
+    Query = 'Who are the friend of Harry Potter?'
+    process_query_to_entity(Query, output_file)

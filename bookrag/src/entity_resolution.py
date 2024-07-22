@@ -78,7 +78,7 @@ def remove_duplicates(tuples_list):
     for item in tuples_list:
         name, typ = item[0],item[1]
         if name not in unique_items:
-            unique_items[name] = (item[0],item[1].lower(),item[2])
+            unique_items[name] = (item[0],item[1],item[2])
         # if (name,typ) not in unique_items:
         #     unique_items[(name,typ)] = (item[0],item[1].lower(),item[2])
     return list(unique_items.values())
@@ -179,6 +179,8 @@ def entities_and_relationships_resolution(input_file, output_file):
     print(f'Resolution entities and relationships have been written to {output_file}')
 
     # save entity_map for debugging
+    with open('jsonl/entity_group_type.json', 'w') as json_file:        
+        json.dump(grouped_data, json_file, indent=4)
     with open('jsonl/entity_resolution_mapping.json', 'w') as json_file:
         json.dump(entity_mapping, json_file, indent=4)
     with open('jsonl/entity_to_doc.json', 'w') as json_file:
@@ -212,11 +214,12 @@ ENTITY_RESOLUTION = [
         [('MR. DURSELY', 'person', 'Mr. Dursley is a director of a drilling firm and takes pride in his normality.'),
         ('MR. DURSLEY', 'person', "Mr. Dursley is Harry Potter's uncle and a non-magical person who disbelieves in anything supernatural."),
         ('HARRY', 'person', 'Harry is a young wizard known for defeating Voldemort as a baby and later facing him multiple times.'),
-        ('HARRY POTTER', 'person', "Harry Potter is a young wizard known for surviving Lord Voldemort's attack as a baby. He is famous throughout the wizarding world for his bravery and magical abilities.")]
+        ('HARRY POTTER', 'person', "Harry Potter is a young wizard known for surviving Lord Voldemort's attack as a baby. He is famous throughout the wizarding world for his bravery and magical abilities."),
+        ('HARRY potter', 'person', "Harry potter is a young wizard who is surviving Lord Voldemort's attack, lived with his aunt.")]
         
         Output: 
         MR. DURSELY {{same}} MR. DURSLEY
-        HARRY {{same}} HARRY POTTER
+        HARRY {{same}} HARRY POTTER {{same}} HARRY potter
 
          {{completion_delimiter}}
 
