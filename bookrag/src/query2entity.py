@@ -38,7 +38,7 @@ def query_to_entity(Query):
     Spell: Includes magical incantations and charms used by characters.
     Title: Titles or roles such as Professor, Head Boy, or Headmaster.
     House: Refers to the different houses at Hogwarts like Gryffindor, Slytherin, etc.
-    Action/Event: Any verb or occurrence that describes what entities do or what happens to them, such as "fight," "friendship," "explore," etc.
+    Action/Event: Any verb, occurrence, state, or significant feeling that describes what entities do, experience, or what happens to them. This includes activities, significant occurrences, states or conditions, and strong emotions. Examples include actions (like "fight" or "explore"), significant events (such as "Sorting Ceremony" or "Quidditch matches"), states or conditions (like "power" or "influence"), and emotions (like "happy" or "feared").
     
     - Steps -
     1. Identify all entities and actions/events. For each identified entity or action/event, extract the following information:
@@ -54,12 +54,13 @@ def query_to_entity(Query):
     - Examples -
     ######################
     Text:
-    'Who are the friends of Harry Potter?'
+    'Who are the friend of Harry Potter?'
     ################
     Output:
     
-    HARRY POTTER{{tuple_delimiter}}Person
-    FRIENDS{{tuple_delimiter}}Action/Event
+    Harry Potter{{tuple_delimiter}}Person
+    Friend{{tuple_delimiter}}Action/Event
+    
     
     {{completion_delimiter}}
 
@@ -81,7 +82,7 @@ def query_to_entity(Query):
     answer = response.choices[0].message.content
 
     CONTINUE_PROMPT = """
-    SOME entities were missed in the last extraction. entity_type must follow the format below:
+    MANY entities were missed in the last extraction. entity_type must follow the format below:
     - entity_type and their description:
 
     Person
@@ -131,8 +132,10 @@ def process_query_to_entity(Query, output_file):
         entity_map = json.load(file)
     
     answer = query_to_entity(Query)
-    answer = answer.split('\n')
     print(answer)
+    answer = answer.split('\n')
+    seen = set()
+    
     with jsonlines.open(output_file, 'w') as writer:
         for line in answer:
             line = standardize_delimiter(line)
@@ -146,7 +149,11 @@ def process_query_to_entity(Query, output_file):
                 for hits in relationship_results:
                     for result in hits:
                         #print(result.get('relationship_description'))
-                        writer.write({'relationship_description': result.get('relationship_description')})
+                        des = result.get('relationship_description')
+                        if des not in seen:
+                            writer.write({'relationship_description': result.get('relationship_description')})
+                            seen.add(des)
+                        
             else:
                 entity_name_embedding = calculate_embedding(entity_name)
                 entity_results = search_entity_by_embedding_and_type(entity_collection_name, entity_name_embedding, entity_type)
@@ -154,11 +161,12 @@ def process_query_to_entity(Query, output_file):
                 for hits in entity_results:
                     for result in hits:
                         original_name = result.get('entity_name')
-                        record_name = entity_map[original_name]
-                        #print(result.get('entity_name'))
-                        #print(result.get('entity_description'))
-                        writer.write({'entity_name': record_name, 'entity_type': entity_type,'entity_description': result.get('entity_description')})
-
+                        record_name = entity_map.get(original_name) or original_name
+                        if record_name not in seen:
+                            #print(result.get('entity_name'))
+                            #print(result.get('entity_description'))
+                            writer.write({'entity_name': record_name, 'entity_type': entity_type,'entity_description': result.get('entity_description')})
+                            seen.add(record_name)
             
             
 

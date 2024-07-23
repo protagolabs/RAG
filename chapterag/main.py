@@ -8,7 +8,7 @@ from src.query2entity import process_query_to_entity
 if __name__ == "__main__":
 
     # Chunk docs
-    folder_path = 'input/harryPotter'  # Replace with the path to your folder
+    folder_path = 'input/smartCity'  # Replace with the path to your folder
     raw_file = 'jsonl/raw.jsonl'
 
     #chunks = process_folder(folder_path,raw_file)
@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # summarize chunks
     raw_summary_file = 'jsonl/raw_summary.jsonl'
-    #process_summarize(raw_file,raw_summary_file)
+    process_summarize(raw_file,raw_summary_file)
     
     # extract entity
     raw_entity_file = 'jsonl/raw_entity.jsonl'  
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     output_file = 'jsonl/query_to_entity.jsonl'
     #Query = 'Who are the friend of Harry Potter?'
     Query = 'how many wizard appeared in this book?'
-    process_query_to_entity(Query, output_file)
+    #process_query_to_entity(Query, output_file)
 
     # findout doc_id based on query and filter them based on query
 
