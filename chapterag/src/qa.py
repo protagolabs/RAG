@@ -15,19 +15,19 @@ def ask_question(document, question):
     prompt = f"""
     ---Role---
 
-    You are a helpful assistant responding to a question based on the provided paragraph.
+    You are a helpful assistant responding to a question based on the provided reference paragraph and your own knowledge.
 
     ---Goal---
 
-    1. Determine if the given document is related to the user's query.
-        - If the document is not related to the query, respond with "I don't know."
-        - If the document is related to the query, proceed to step 2.
+    1. Determine if the reference document is STRONGLY related to the question.
+        - If the document is not STRONGLY related to the question, respond with "I don't know."
+        - If the document is STRONGLY related to the question, proceed to step 2.
 
     2. Generate a response directly answering the user's question using the context from the document. Focus only on the question, removing all irrelevant information.
 
     ---Guidelines---
 
-    1. Provide answers to the user's query, supported by evidence or data from the document.
+    1. Provide answers to the question, supported by evidence or data from the document.
 
     2. Follow the structure:
         - Answer One: Description of the answer
@@ -46,7 +46,7 @@ def ask_question(document, question):
     ######################   
     ---Example---
     ###################### 
-    Here is the Document: 
+    Here is the Reference Document: 
 
     "The solar system consists of the Sun and the objects that orbit it, including eight planets, their moons, and other celestial bodies such as asteroids and comets. The Sun, which is a star, contains 99.86% of the solar system's mass. The four inner planets, Mercury, Venus, Earth, and Mars, are rocky, while the outer planets, Jupiter, Saturn, Uranus, and Neptune, are gas giants except for Neptune and Uranus, which are ice giants. The asteroid belt, which lies between Mars and Jupiter, contains many small rocky bodies. "
     
@@ -63,11 +63,11 @@ def ask_question(document, question):
 
     
     ---Input---
-    Here is the document: 
+    Here is the Reference Document: 
     
     {document}
 
-    Here is the question:
+    Here is the Question:
 
     {question}
     
@@ -92,11 +92,9 @@ def map_reduce_documents(input_file, output_file, question):
     # Map step: ask the question to each document
     results = []
     for doc in documents:
-        for key, value in doc.items():
-            # Assuming the document text is the value of the key
-            document_text = value
-            answer = ask_question(document_text, question)
-            results.append({'doc_id': key, 'answer': answer})
+        doc_id, file_name, document_text = doc.values()            
+        answer = ask_question(document_text, question)
+        results.append({'doc_id': doc_id, 'file_name':file_name,'answer': answer, 'reference': document_text, 'question': question})
            
             
     # Reduce step: write the results to the output JSONL file
@@ -105,6 +103,11 @@ def map_reduce_documents(input_file, output_file, question):
             writer.write(result)
 
     #return results
+
+########################################################################
+# Process with multiple documents
+########################################################################
+
 
 
 if __name__ == "__main__":

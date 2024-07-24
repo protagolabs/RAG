@@ -20,16 +20,14 @@ def aggregate(document, question):
 
     ---Goal---
 
-    Generate a response of the target length and format that responds to the user's question, summarize all the reports from multiple analysts.
+    Generate a response of the target length and format that responds to the user's question, merge all the perspectives from multiple analysts.
     
     - Description: A comprehensive response summarized from multiple analysts.
    
     
     ---Guidelines--- 
 
-    The final response should remove all irrelevant information from the analysts' reports and merge the cleaned information into a comprehensive answer that provides explanations of all the key points and implications.
-
-    No Answer Provided: If you think the dataset is irrelevant or not suitable to the question, respond with "I don't know." Do not attempt to answer the question based on your own knowledge or assumptions.
+    The final response should remove all irrelevant information from the analysts' perspectives and merge the cleaned information into a comprehensive answer that provides explanations of all the key points and implications.
 
     ---Input---
 
@@ -54,27 +52,46 @@ def aggregate(document, question):
     )
     answer = response.choices[0].message.content
     
-    return answer
+    CONTINUE_PROMPT = """
+    MANY perspectives were missed in last synthesizing. Include them to generate a comprehensive response:
+    
+    """
+    new_prompt = prompt + '\n' + answer + '\n' + CONTINUE_PROMPT
+    response = client.chat.completions.create(
+        model='gemma2',
+        messages=[{"role": "system", "content": new_prompt}],
+        max_tokens=2000,
+        n=1,
+        temperature=0.1,
+    )
+    new_answer = response.choices[0].message.content
+
+    return new_answer
 
 def process_aggregate(input_file, output_file, question):
     # Read the input JSONL file
     with jsonlines.open(input_file, mode='r') as reader:
         documents = [doc for doc in reader]
 
-    # Map step: ask the question to each document
     results = []
+    reference_doc = []
+    document_text = ""
     for doc in documents:
-        for key, value in doc.items():
-            # Assuming the document text is the value of the key
-            document_text = '\n\n'.join(value)
-            answer = aggregate(document_text, question)
-            # Filter out "I don't know" from the answer
-            if "don't know" not in answer:
-                results.append({key: answer})
+        doc_id, file_name, answer, reference, question = doc.values()
+        if "don't know" not in answer:
+            document_text += answer + "\n\n"
+            for line in answer.split('\n'):
+                if len(line) > 50:
+                    reference_doc.append({doc_id: doc_id, 'file_name': file_name, 'reference': line, 'question': question})
+    
+    answer = aggregate(document_text, question)
+    results.append({question: answer})
 
     # Save the answers to a new JSONL file
     with jsonlines.open(output_file, mode='w') as writer:
         writer.write_all(results)
+    with jsonlines.open('jsonl/reference_doc.jsonl', mode='w') as writer:
+        writer.write_all(reference_doc)
 
     print(f"Answers saved to {output_file}")
 
