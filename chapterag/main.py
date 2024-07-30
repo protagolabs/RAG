@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     # direct qa
     output_qa_file = 'jsonl/raw_answers.jsonl' 
-    question = "what are the urban mobility challenge nowadays? when you answerm it is better to give reasons or examples."
-    #map_reduce_documents(raw_summary_file, output_qa_file, question)
+    question = "What are the challenges regarding Regulatory frameworks for new mobility technologies? Please provide me with explanation and evidence."
+    map_reduce_documents(raw_summary_file, output_qa_file, question)
 
 
     # aggregate
