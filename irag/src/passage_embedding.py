@@ -17,6 +17,11 @@ def save_embedding_to_milvus(document_collection_name):
     #passages = passages.select(range(10))
 
     documents = []
+    batch_size = 1000
+
+    connect_to_milvus()
+    #create_document_collection_if_not_exists(document_collection_name)
+
     for passage in passages:
         _id = passage['_id']
         text = passage['text']
@@ -24,8 +29,14 @@ def save_embedding_to_milvus(document_collection_name):
         embedding = calculate_embedding(text)
         documents.append((_id, doc_id, embedding))
 
-    #initialize_and_insert_data(entity_collection_name, relationship_collection_name, entities, relationships)
-    connect_to_milvus()
-    create_document_collection_if_not_exists(document_collection_name)
-    insert_document_data(document_collection_name, documents)
+        # Insert documents in batches of 1000
+        if len(documents) == batch_size:
+            insert_document_data(document_collection_name, documents)
+            documents = []
+
+    
+    
+    # Insert any remaining documents
+    if documents:
+        insert_document_data(document_collection_name, documents)
     #create_index(document_collection_name, "text_embedding")

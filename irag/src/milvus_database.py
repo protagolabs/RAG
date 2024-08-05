@@ -68,18 +68,6 @@ def insert_document_data(collection_name: str, documents: List[Tuple[str, str, L
     collection.insert(data)
     print(f"Inserted {len(documents)} documents into collection '{collection_name}'")
 
-# Function to initialize and insert data into Milvus
-def initialize_and_insert_data(entity_collection_name, relationship_collection_name, entities: List[Tuple[str, str, str, List[float]]], relationships: List[Tuple[str, str, str, List[float]]]):
-    # Connect to Milvus
-    connect_to_milvus()
-
-    # Create collections if not exist
-    create_entity_collection_if_not_exists(entity_collection_name)
-    create_relationship_collection_if_not_exists(relationship_collection_name)
-
-    # Insert data into collections
-    insert_entity_data(entity_collection_name, entities)
-    insert_relationship_data(relationship_collection_name, relationships)
 
 # Function to create an index for a collection
 def create_index(collection_name: str, field_name: str):
@@ -146,7 +134,6 @@ if __name__ == "__main__":
         ("D2147835-0", "D2147835", [0.6] * 1024)
     ]
 
-    #initialize_and_insert_data(entity_collection_name, relationship_collection_name, entities, relationships)
     connect_to_milvus()
     create_document_collection_if_not_exists(document_collection_name)
     insert_document_data(document_collection_name, documents)
