@@ -19,10 +19,20 @@ load_dotenv()
 # MILVUS_COLLECTION = os.getenv('MILVUS_COLLECTION')
 
 # Function to connect to Milvus
+# def connect_to_milvus():
+#     uri = os.getenv('MILVUS_URI')
+#     token = os.getenv('MILVUS_TOKEN')
+#     connections.connect(uri=uri, token=token)
+#     print("Connected to Milvus")
 def connect_to_milvus():
-    uri = os.getenv('MILVUS_URI')
-    token = os.getenv('MILVUS_TOKEN')
-    connections.connect(uri=uri, token=token)
+    alias = "default"
+    host = os.getenv('MILVUS_host')
+    port='19530'
+    connections.connect(
+        alias=alias, 
+        host=host,
+        port=port
+    )
     print("Connected to Milvus")
 
 # Function to list all collections
