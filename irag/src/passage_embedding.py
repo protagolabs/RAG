@@ -20,7 +20,7 @@ def save_embedding_to_milvus(document_collection_name):
     batch_size = 1000
 
     connect_to_milvus()
-    create_document_collection_if_not_exists(document_collection_name)
+    #create_document_collection_if_not_exists(document_collection_name)
 
     for passage in passages:
         _id = passage['_id']
