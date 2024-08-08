@@ -100,7 +100,7 @@ def search_document_by_embedding(collection_name: str, text_embedding: List[floa
         collection = Collection(collection_name)
         
         # Define search parameters
-        search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
+        search_params = {"metric_type": "L2", "params": {"nprobe": 32}}
         
         # Perform the search
         output_fields = ["_id", "doc_id"]  # Add the fields you want to retrieve
