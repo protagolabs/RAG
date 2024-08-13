@@ -5,24 +5,44 @@ import torch
 import ollama
 import re
 from datasets import load_dataset, Dataset
+from dotenv import load_dotenv
+import os
+# Load environment variables
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Initialize the LLM client
-client = OpenAI(
-    base_url='http://localhost:11434/v1',
-    api_key='gemma2'
-)
+# client = OpenAI(
+#     base_url='http://localhost:11434/v1',
+#     api_key='gemma2'
+# )
 
 def role_answer(prompt, question):
     #prompt = prompt + '\n' + 'Question: ' + question
+    # response = client.chat.completions.create(
+    #     model='gemma2',
+    #     messages=[{"role": "system", "content": prompt}, {"role": "user", "content": 'Question: ' + question}],
+    #     #messages=[{"role": "system", "content": prompt}],
+    #     max_tokens=1000,
+    #     n=1,
+    #     temperature=0.1,
+    # )
+    # answer = response.choices[0].message.content
+
+    # Send the prompt to OpenAI's GPT-4
     response = client.chat.completions.create(
-        model='gemma2',
+        model="gpt-4o",
         messages=[{"role": "system", "content": prompt}, {"role": "user", "content": 'Question: ' + question}],
-        #messages=[{"role": "system", "content": prompt}],
         max_tokens=1000,
-        n=1,
-        temperature=0.1,
+        stop=None,
+        temperature=0.7
     )
+
     answer = response.choices[0].message.content
+    
+    return answer
     
     return answer
 

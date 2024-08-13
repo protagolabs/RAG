@@ -20,7 +20,7 @@ def save_embedding_to_milvus(document_collection_name):
     passages = load_dataset("UKPLab/dapr", "MSMARCO-corpus", split="test")
     #passages = passages.select(range(1000000))
     #passages = passages.select(range(10))
-    passages = passages.select(range(1000000, len(passages)))
+    passages = passages.select(range(2540020, len(passages)))
     total_rows = len(passages)
 
     documents = []
