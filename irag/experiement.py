@@ -23,8 +23,8 @@ role_answer = load_dataset("elricwan/MSMARCO-queries-roleAns", split="train")
 retrieve = {}
 for role_ in role_answer:
     _id = role_["_id"]
+    retrieve[_id] = {}
     tmp = []
-    seen_ids = set()
     answers = role_["answers"]
     question = role_["text"]
 
@@ -33,24 +33,23 @@ for role_ in role_answer:
     document_results = search_document_by_embedding(document_collection_name, embedding, 30)
     document_results = document_results[0]
     for result in document_results:
-        if result.id not in seen_ids:
-            tmp.append((result.id,result.distance))
-            seen_ids.add(result.id)
+        tmp.append((result.id,result.distance))
+    retrieve[_id]['question'] = tmp    
 
     # use answer to find reference
     for key in answers:
+        tmp = []
         ans = answers[key]
         if 'do not know' not in ans:
             embedding = calculate_embedding(ans)
             document_results = search_document_by_embedding(document_collection_name, embedding, 30)
             document_results = document_results[0]
             for result in document_results:
-                if result.id not in seen_ids:
-                    tmp.append((result.id,result.distance))
-                    seen_ids.add(result.id)
+                
+                tmp.append((result.id,result.distance))
         
-    retrieve[_id] = tmp
+        retrieve[_id][key] = tmp
 
-with open('jsonl/data.json', 'w') as json_file:
+with open('jsonl/retrieve.json', 'w') as json_file:
     json.dump(retrieve, json_file, indent=4)
 print("Data saved to data.json")
