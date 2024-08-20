@@ -13,4 +13,4 @@
 **/input
 
 # Ignore Jupyter notebook file
-**/test.ipynb
+#**/test.ipynb
